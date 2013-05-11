@@ -1,9 +1,11 @@
 require 'socket'
 
 module TCPTimeout
-  VERSION = "0.0.1"
+  VERSION = "0.0.2"
 
   DELEGATED_METHODS = %w[close closed? setsockopt]
+  WRITE_METHODS = %w[write]
+  READ_METHODS = %w[read readbyte]
 
   class SocketTimeout < SocketError; end
     
@@ -11,6 +13,24 @@ module TCPTimeout
     DELEGATED_METHODS.each do |method|
       class_eval(<<-EVAL, __FILE__, __LINE__)
         def #{method}(*args)
+          @socket.__send__(:#{method}, *args)
+        end
+      EVAL
+    end
+
+    WRITE_METHODS.each do |method|
+      class_eval(<<-EVAL, __FILE__, __LINE__)
+        def #{method}(*args)
+          select_timeout(:write)
+          @socket.__send__(:#{method}, *args)
+        end
+      EVAL
+    end
+
+    READ_METHODS.each do |method|
+      class_eval(<<-EVAL, __FILE__, __LINE__)
+        def #{method}(*args)
+          select_timeout(:read)
           @socket.__send__(:#{method}, *args)
         end
       EVAL
@@ -49,16 +69,6 @@ module TCPTimeout
       rescue Errno::EISCONN
         # Successfully connected
       end
-    end
-
-    def write(*args)
-      select_timeout(:write) 
-      @socket.write(*args)
-    end
-
-    def read(*args)
-      select_timeout(:read)
-      @socket.read(*args)
     end
 
     private

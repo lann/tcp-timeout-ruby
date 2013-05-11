@@ -18,6 +18,7 @@ TCPTimeout::TCPSocket implements only a small subset of Socket methods:
 #connect
 #write
 #read
+#readbyte
 #close
 #closed?
 #setsockopt
