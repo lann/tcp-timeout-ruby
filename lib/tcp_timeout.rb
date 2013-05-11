@@ -1,7 +1,7 @@
 require 'socket'
 
 module TCPTimeout
-  VERSION = "0.0.2"
+  VERSION = "0.0.3"
 
   DELEGATED_METHODS = %w[close closed? setsockopt]
   WRITE_METHODS = %w[write]
@@ -21,7 +21,7 @@ module TCPTimeout
     WRITE_METHODS.each do |method|
       class_eval(<<-EVAL, __FILE__, __LINE__)
         def #{method}(*args)
-          select_timeout(:write)
+          select_timeout(:write) if @timeouts[:write]
           @socket.__send__(:#{method}, *args)
         end
       EVAL
@@ -30,7 +30,7 @@ module TCPTimeout
     READ_METHODS.each do |method|
       class_eval(<<-EVAL, __FILE__, __LINE__)
         def #{method}(*args)
-          select_timeout(:read)
+          select_timeout(:read) if @timeouts[:read]
           @socket.__send__(:#{method}, *args)
         end
       EVAL
@@ -74,11 +74,9 @@ module TCPTimeout
     private
 
     def select_timeout(type)
-      if timeout = @timeouts[type]
-        type == :read ? read_array = [@socket] : write_array = [@socket]
-        unless IO.select(read_array, write_array, [@socket], timeout)
-          raise SocketTimeout, "#{type} timeout"
-        end
+      type == :read ? read_array = [@socket] : write_array = [@socket]
+      unless IO.select(read_array, write_array, [@socket], @timeouts[type])
+        raise SocketTimeout, "#{type} timeout"
       end
     end
   end
