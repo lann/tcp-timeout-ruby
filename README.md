@@ -1,3 +1,5 @@
+**The current version has major problems. Don't use it.**
+
 # TCPTimeout
 
 A simple wrapper around Ruby Sockets providing timeouts for connect, write,
