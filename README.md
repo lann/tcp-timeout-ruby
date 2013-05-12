@@ -19,8 +19,8 @@ string which will receive the data even after a timeout.
 
 Other options:
 
-`:family` - set the address family for the connection, e.g. `:INET` or `:INET6`
-`:local_host` and `:local_port` - the host and port to bind to
+- `:family` - set the address family for the connection, e.g. `:INET` or `:INET6`
+- `:local_host` and `:local_port` - the host and port to bind to
 
 TCPTimeout::TCPSocket supports only a subset of IO methods, including:
 
