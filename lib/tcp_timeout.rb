@@ -1,7 +1,7 @@
 require 'socket'
 
 module TCPTimeout
-  VERSION = "0.1.0"
+  VERSION = "0.1.1"
 
   DELEGATED_METHODS = %w[
     close closed?
@@ -50,7 +50,7 @@ module TCPTimeout
       return @socket.connect(@sockaddr) unless @connect_timeout
 
       begin
-        @socket.connect_nonblock(@socket_address)
+        @socket.connect_nonblock(@sockaddr)
       rescue Errno::EINPROGRESS
         select_timeout(:connect, @connect_timeout)
         # If there was a failure this will raise an Error
@@ -154,7 +154,7 @@ module TCPTimeout
         start = Time.now
         if IO.select(read_array, write_array, [@socket], timeout)
           waited = Time.now - start
-          return timeline - waited
+          return timeout - waited
         end
       end
       raise SocketTimeout, "#{type} timeout"
