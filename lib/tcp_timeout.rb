@@ -7,7 +7,7 @@ module TCPTimeout
     close closed?
     getsockopt setsockopt
     local_address remote_address
-    read_nonblock wrote_nonblock
+    read_nonblock write_nonblock
     fileno
   ]
 
@@ -87,7 +87,7 @@ module TCPTimeout
       raise ArgumentError, 'too many arguments' if args.length > 2
 
       timeout = (args.length > 1) ? args.pop : @read_timeout
-      return @socket.read(length, *args) unless length > 0 && timeout
+      return @socket.read(length, *args) unless length && length > 0 && timeout
 
       buffer = args.first || ''.force_encoding(Encoding::ASCII_8BIT)
 
